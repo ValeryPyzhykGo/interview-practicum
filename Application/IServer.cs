@@ -10,5 +10,5 @@ public interface IServer
   /// </summary>
   /// <param name="unparsedOrder">for example 1,2,3</param>
   /// <returns>for example: steak,potato,wine</returns>
-  Task<string> TakeOrder(string unparsedOrder);
+  Task<string> TakeOrderAsync(string unparsedOrder);
 }

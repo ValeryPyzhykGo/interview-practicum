@@ -1,65 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using Application.Entities;
+using Application.Managers;
+using AutoMapper;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading.Tasks;
 
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+[assembly: InternalsVisibleTo("Application.UnitTests")]
 namespace Application;
 
 public class Server : IServer
 {
-    private readonly IDishManager _dishManager;
+    private readonly IInputManager _inputManager;
+    private readonly IOrderManager _orderManager;
+    private readonly IOutputManager _outputManager;
 
-    public Server()
+    public Server(ServerConfig config) 
     {
-        _dishManager = new DishManager();
+        var servicesCollection = SetUp.SetUpServiceCollection(config);
+        _inputManager = servicesCollection.GetRequiredService<IInputManager>();
+        _orderManager = servicesCollection.GetRequiredService<IOrderManager>();
+        _outputManager = servicesCollection.GetRequiredService<IOutputManager>();
     }
 
-    public Task<string> TakeOrder(string unparsedOrder)
+    internal Server(IInputManager inputManager, IOutputManager outputManager, IOrderManager orderManager)
+    {
+        _inputManager = inputManager;
+        _outputManager = outputManager;
+        _orderManager = orderManager;
+    }
+
+    public async Task<string> TakeOrderAsync(string unparsedOrder)
     {
         try
         {
-            var order = ParseOrder(unparsedOrder);
-            var dishes = _dishManager.GetDishes(order).Result;
-            var returnValue = FormatOutput(dishes);
-            return Task.FromResult(returnValue);
+            var userParams = _inputManager.ParseUserInput(unparsedOrder);
+            var order = await _orderManager.GenerateOrderAsync(userParams.Daytime, userParams.DishNumbers);
+            return _outputManager.GenerateOutput(order);
         }
         catch
         {
-            return Task.FromResult("error");
+            return "error";
         }
-    }
-
-
-    private Order ParseOrder(string unparsedOrder)
-    {
-        var returnValue = new Order
-        {
-            Dishes = new List<int>()
-        };
-
-        var orderItems = unparsedOrder.Split(',');
-        foreach (var orderItem in orderItems)
-        {
-            var parsedOrder = int.Parse(orderItem);
-            returnValue.Dishes.Add(parsedOrder);
-        }
-
-        return returnValue;
-    }
-
-    private string FormatOutput(List<Dish> dishes)
-    {
-        var returnValue = "";
-
-        foreach (var dish in dishes)
-            returnValue = returnValue + string.Format(",{0}{1}", dish.DishName, GetMultiple(dish.Count));
-
-        if (returnValue.StartsWith(",")) returnValue = returnValue.TrimStart(',');
-
-        return returnValue;
-    }
-
-    private object GetMultiple(int count)
-    {
-        if (count > 1) return string.Format("(x{0})", count);
-        return "";
     }
 }

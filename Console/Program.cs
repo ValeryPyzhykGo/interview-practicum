@@ -5,14 +5,27 @@ namespace Console;
 
 internal class Program
 {
+    const string ConfigFilePath = "config.json";
     private static async Task Main()
     {
-        var server = new Server();
-        while (true)
+        ServerConfig config = null;
+        try
         {
-            var unparsedOrder = System.Console.ReadLine();
-            var output = await Task.Run(() => server.TakeOrder(unparsedOrder).Result);
-            System.Console.WriteLine(output);
+            config = await ServerConfig.FromFile(ConfigFilePath);
+        }
+        catch
+        {
+            System.Console.WriteLine("Error. Inncorect cofig file.");
+        }
+
+        if (config != null) {
+            var server = new Server(config);
+            while (true)
+            {
+                var unparsedOrder = System.Console.ReadLine();
+                var output = await server.TakeOrderAsync(unparsedOrder);
+                System.Console.WriteLine(output);
+            }
         }
     }
 }

@@ -1,0 +1,8 @@
+Daytime,DishNumber,DishType,DishName,IsMultiple
+evening,1,entrée,steak,false
+evening,2,side,potato,true
+evening,3,drink,wine,false
+evening,4,dessert,cake,false
+morning,1,entrée,egg,false
+morning,2,side,toast,false
+morning,3,drink,coffee,true

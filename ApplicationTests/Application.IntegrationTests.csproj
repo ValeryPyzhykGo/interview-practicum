@@ -2,18 +2,20 @@
 
     <PropertyGroup>
         <TargetFramework>net6</TargetFramework>
-        <OutputType>Exe</OutputType>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NUnit" Version="3.*" />
+        <PackageReference Include="NUnit3TestAdapter" Version="3.*" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="config.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
       <None Update="menu.csv">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
